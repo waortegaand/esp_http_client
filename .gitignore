@@ -7,7 +7,10 @@
 /sdkconfig
 /sdkconfig.old
 /sdkconfig.ci
+
+# Files
 /**/sdk_config.h
+main/include/conn_config.h
 /main/esp_config.h
 
 # Visual Studio Code

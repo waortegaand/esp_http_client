@@ -24,15 +24,23 @@
 #include "http_request.h"
 #include "wifi_connect.h" 
 
+static char count[40];
+static int32_t millis = 2000;
+
 static const char *TAG = "___wifi_station___";
 /* */
 static void http_test_task(void *pvParameters)
 {
-    http_rest_with_url();
-    http_rest_with_hostname_path();
-    https_with_url();
-    https_with_hostname_path();
-
+	int counter = 0;
+	while(counter<5){
+		counter++;
+		sprintf(count,"{\"valueTemp\":%d}",counter);
+		ESP_LOGI(TAG, "Contador: %d bytes", counter);
+    vTaskDelay(millis / portTICK_PERIOD_MS);	
+		
+    http_post(count);
+    http_get();
+  }
     ESP_LOGI(TAG, "Finish http example");
     vTaskDelete(NULL);
 }
@@ -67,4 +75,6 @@ void app_main(void)
      */
     ESP_ERROR_CHECK(example_connect());
     ESP_LOGI(TAG, "Connected to AP, begin http example");
+
+    xTaskCreate( &http_test_task, "http_test_task", 1024*10, NULL, 5, NULL );
 }

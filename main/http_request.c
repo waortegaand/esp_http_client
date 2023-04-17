@@ -22,6 +22,9 @@
 
 #include "include/http_request.h"
 
+#define HOST_IOT_SERVER "iotplatform.azurewebsites.net"
+#define PATH_GET_LAST_TEMP   "/spi/lasttemp"
+#define PATH_POST_TEMP  "/termopar/tipok"
 
 /* Root cert for howsmyssl.com, taken from howsmyssl_com_root_cert.pem
 
@@ -35,8 +38,8 @@
 */
 
 /* //Certificate is used in this project for https://iiot4.herokuapp.com */
-extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_iiot4_herokuapp_com_chain_pem_start");
-extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_iiot4_herokuapp_com_chain_pem_end");
+extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_iotplatform_azurewebsites_net_chain_pem_start");
+extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_iotplatform_azurewebsites_net_chain_pem_end");
 
 
 static const char *TAG = "HTTP_CLIENT";
@@ -83,6 +86,56 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 
 //void https_rest_with_url_post(void);
 
+void http_get(void){
+    esp_http_client_config_t config = {
+        .host = HOST_IOT_SERVER,
+        .path = PATH_GET_LAST_TEMP,
+        .event_handler = _http_event_handler,
+        .cert_pem = howsmyssl_com_root_cert_pem_start,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    // GET
+    esp_err_t err = esp_http_client_perform(client);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTP GET Status = %d, content_length = %d",
+                esp_http_client_get_status_code(client),
+                esp_http_client_get_content_length(client));
+        printf("\n--------------- Mensaje GET Obtenido ---------\n");
+    } else {
+        ESP_LOGE(TAG, "HTTP GET request failed: %s", esp_err_to_name(err));
+    }
+    esp_http_client_cleanup(client);
+}
+
+void http_post(const char *send_data){
+    //const char send_data = *data;
+    esp_http_client_config_t config = {
+        .host = HOST_IOT_SERVER,
+        .path = PATH_POST_TEMP,
+        .event_handler = _http_event_handler,
+        .cert_pem = howsmyssl_com_root_cert_pem_start,
+    };
+    esp_http_client_handle_t client = esp_http_client_init(&config);
+    // POST
+    //const char *post_data = "field1=value1&field2=value2";
+    //esp_http_client_set_url(client, "/post");
+    //const char *post_data = "{\"valueTemp\":25.0}";
+    const char *post_data = send_data;
+    esp_http_client_set_method(client, HTTP_METHOD_POST);
+    esp_http_client_set_header(client, "Content-Type", "application/json");
+    esp_http_client_set_post_field(client, post_data, strlen(post_data));
+    esp_err_t err = esp_http_client_perform(client);
+    if (err == ESP_OK) {
+        ESP_LOGI(TAG, "HTTP POST Status = %d, content_length = %d",
+                esp_http_client_get_status_code(client),
+                esp_http_client_get_content_length(client));
+    } else {
+        ESP_LOGE(TAG, "HTTP POST request failed: %s", esp_err_to_name(err));
+    }
+    esp_http_client_cleanup(client);
+}
+
+/*
 void http_rest_with_url(void)
 {
     esp_http_client_config_t config = {
@@ -296,6 +349,8 @@ void https_with_hostname_path(void)
     }
     esp_http_client_cleanup(client);
 }
+
+*/
 
 /*
  *  http_native_request() demonstrates use of low level APIs to connect to a server,
