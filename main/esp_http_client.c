@@ -32,10 +32,10 @@ static const char *TAG = "___wifi_station___";
 static void http_test_task(void *pvParameters)
 {
 	int counter = 0;
-	while(counter<5){
+	while(counter<2){
 		counter++;
-		sprintf(count,"{\"valueTemp\":%d}",counter);
-		ESP_LOGI(TAG, "Contador: %d bytes", counter);
+		sprintf(count,"{\"tempTk\":\"%d\"}",counter);
+		ESP_LOGI(TAG, "Contador: %d bytes: mensaje: %s", counter, count);
     vTaskDelay(millis / portTICK_PERIOD_MS);	
 		
     http_post(count);
