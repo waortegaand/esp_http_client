@@ -9,10 +9,13 @@
 #define __HTTP_REQUEST__
 
 
+void http_get(void);
+void http_post(const char *send_data);
+/*
 void http_rest_with_url(void);
 void http_rest_with_hostname_path(void);
 void https_with_url(void);
 void https_with_hostname_path(void);
-
+*/
 
 #endif /* __HTTP_REQUEST__ */
